@@ -5,7 +5,7 @@
     "buildCommand": "cd backend && pip install -r requirements-prod.txt && python manage.py collectstatic --noinput"
   },
   "deploy": {
-    "startCommand": "cd backend && gunicorn config.wsgi --bind 0.0.0.0:$PORT",
+    "startCommand": "cd backend && celery -A config worker -l info",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }
