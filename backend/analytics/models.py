@@ -1,3 +1,4 @@
 from django.db import models
 
-# Create your models here.
+# Analytics will use aggregated queries from existing models
+# No additional models needed for MVP

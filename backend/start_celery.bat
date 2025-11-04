@@ -1,0 +1,3 @@
+@echo off
+echo Starting Celery worker...
+celery -A config worker -l info --pool=solo
