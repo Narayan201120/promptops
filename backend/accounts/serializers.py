@@ -21,7 +21,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])
-    tenant_name = serializers.CharField(write_only=True)
+    tenant_name = serializers.CharField(write_only=True, required=True, min_length=1, max_length=255)
     
     class Meta:
         model = User
