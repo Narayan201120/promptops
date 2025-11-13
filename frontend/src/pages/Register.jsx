@@ -22,7 +22,15 @@ export default function Register() {
       await register(formData);
       navigate('/login');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Registration failed');
+      const errorData = err.response?.data;
+      if (typeof errorData === 'object') {
+        const errors = Object.entries(errorData)
+          .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
+          .join('; ');
+        setError(errors || 'Registration failed');
+      } else {
+        setError(errorData?.detail || 'Registration failed');
+      }
     }
   };
 
