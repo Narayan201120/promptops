@@ -1,0 +1,119 @@
+.container {
+    display: flex;
+    min-height: 100vh;
+    background: radial-gradient(circle at top center, #111827 0%, #030712 100%);
+}
+
+/* Sidebar */
+.sidebar {
+    width: 260px;
+    background: rgba(3, 7, 18, 0.8);
+    backdrop-filter: blur(20px);
+    border-right: 1px solid var(--border-light);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 50;
+}
+
+.logo {
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.logoText {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.nav {
+    flex: 1;
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.navItem {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-weight: 500;
+    transition: all 0.2s var(--ease-out);
+    position: relative;
+}
+
+.navItem:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+.navItemActive {
+    background: rgba(6, 182, 212, 0.1);
+    color: var(--primary);
+}
+
+.navItemActive::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 16px;
+    background: var(--primary);
+    border-radius: 0 2px 2px 0;
+    box-shadow: 0 0 10px var(--primary);
+}
+
+.userSection {
+    padding: 1rem;
+    border-top: 1px solid var(--border-light);
+}
+
+/* Main Content */
+.main {
+    flex: 1;
+    margin-left: 260px;
+    /* Sidebar width */
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.header {
+    height: 64px;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    background: rgba(3, 7, 18, 0.6);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+}
+
+.breadcrumbs {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.content {
+    padding: 2rem;
+    flex: 1;
+}

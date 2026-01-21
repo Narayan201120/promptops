@@ -6,6 +6,7 @@ __pycache__/
 .Python
 env/
 venv/
+.venv/
 ENV/
 *.egg-info/
 dist/
@@ -20,6 +21,7 @@ staticfiles/
 # Environment variables
 .env
 .env.local
+.env.production
 
 # IDEs
 .vscode/
@@ -45,5 +47,14 @@ Thumbs.db
 *.db
 
 # Temporary files
-extracted_text.txt
-Prompt Ops.docx
+*.tmp
+*.temp
+
+# Documents
+*.txt
+*.pdf
+*.docx
+*.doc
+
+# Gemini artifacts
+.gemini/

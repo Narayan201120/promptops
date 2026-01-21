@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import GlassCard from '../components/ui/GlassCard';
+import Button from '../components/ui/Button';
+import Input from '../components/ui/Input';
+import { User, Mail, Lock, Building, UserPlus } from 'lucide-react';
+import styles from './Register.module.css';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -9,112 +14,105 @@ export default function Register() {
     password: '',
     first_name: '',
     last_name: '',
-    tenant_name: '',
+    organization_name: ''
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
     try {
       await register(formData);
-      navigate('/login');
+      navigate('/');
     } catch (err) {
-      const errorData = err.response?.data;
-      if (typeof errorData === 'object') {
-        const errors = Object.entries(errorData)
-          .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
-          .join('; ');
-        setError(errors || 'Registration failed');
-      } else {
-        setError(errorData?.detail || 'Registration failed');
-      }
+      setError(err.response?.data?.detail || 'Registration failed');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
-        <div>
-          <h2 className="text-3xl font-bold text-center">Create Account</h2>
-          <p className="mt-2 text-center text-gray-600">Get started with PromptOps</p>
+    <div className={styles.container}>
+      <GlassCard className={styles.authCard}>
+        <div className={styles.header}>
+          <div className={styles.logo}>P</div>
+          <h1 className={styles.title}>Create Account</h1>
+          <p className={styles.subtitle}>Get started with PromptOps</p>
         </div>
-        <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
-          {error && (
-            <div className="bg-red-50 text-red-600 p-3 rounded">{error}</div>
-          )}
-          <input
-            type="text"
-            name="username"
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+
+        <form className={styles.form} onSubmit={handleSubmit}>
+          {error && <div className={styles.error}>{error}</div>}
+
+          <Input
+            icon={User}
             placeholder="Username"
             value={formData.username}
-            onChange={handleChange}
-          />
-          <input
-            type="email"
-            name="email"
+            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+
+          <Input
+            icon={Mail}
+            type="email"
             placeholder="Email"
             value={formData.email}
-            onChange={handleChange}
-          />
-          <input
-            type="password"
-            name="password"
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+
+          <Input
+            icon={Lock}
+            type="password"
             placeholder="Password"
             value={formData.password}
-            onChange={handleChange}
-          />
-          <input
-            type="text"
-            name="first_name"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="First Name"
-            value={formData.first_name}
-            onChange={handleChange}
-          />
-          <input
-            type="text"
-            name="last_name"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Last Name"
-            value={formData.last_name}
-            onChange={handleChange}
-          />
-          <input
-            type="text"
-            name="tenant_name"
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Organization Name"
-            value={formData.tenant_name}
-            onChange={handleChange}
           />
-          <button
+
+          <div className={styles.row}>
+            <Input
+              placeholder="First Name"
+              value={formData.first_name}
+              onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+              required
+              className="flex-1"
+            />
+            <Input
+              placeholder="Last Name"
+              value={formData.last_name}
+              onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+              required
+              className="flex-1"
+            />
+          </div>
+
+          <Input
+            icon={Building}
+            placeholder="Organization Name"
+            value={formData.organization_name}
+            onChange={(e) => setFormData({ ...formData, organization_name: e.target.value })}
+            required
+          />
+
+          <Button
             type="submit"
-            className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md"
+            className="w-full"
+            loading={loading}
+            icon={UserPlus}
           >
             Register
-          </button>
-          <p className="text-center text-sm text-gray-600">
-            Already have an account?{' '}
-            <Link to="/login" className="text-blue-600 hover:text-blue-700">
-              Sign in
-            </Link>
-          </p>
+          </Button>
         </form>
-      </div>
+
+        <div className={styles.footer}>
+          Already have an account?
+          <Link to="/login" className={styles.link}>Sign in</Link>
+        </div>
+      </GlassCard>
     </div>
   );
 }
