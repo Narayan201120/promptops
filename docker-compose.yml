@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
   db:
-    image: postgres:15
+    image: pgvector/pgvector:pg15
     environment:
       POSTGRES_DB: promptops
       POSTGRES_USER: promptops
@@ -15,7 +13,7 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - "6500:6379" # Using 6500 to avoid Windows reserved port ranges
 
 volumes:
   postgres_data:

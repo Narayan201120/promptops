@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { analyticsAPI } from '../api/analytics';
 import Layout from '../components/Layout';
+import GlassCard from '../components/ui/GlassCard';
+import styles from './Analytics.module.css';
 
 export default function Analytics() {
   const { data: summary, isLoading: summaryLoading } = useQuery({
@@ -20,101 +22,116 @@ export default function Analytics() {
   });
 
   if (summaryLoading || trendsLoading || topLoading) {
-    return <Layout><div className="flex items-center justify-center py-12">Loading...</div></Layout>;
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-full text-cyan-400">Loading analytics...</div>
+      </Layout>
+    );
   }
+
+  const chartTheme = {
+    stroke: '#64748b',
+    fill: '#1e293b',
+    text: '#94a3b8'
+  };
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto py-6 px-4">
-        <h1 className="text-2xl font-bold mb-6">Analytics</h1>
-
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-sm text-gray-500">Total Prompts</div>
-            <div className="text-3xl font-bold">{summary?.total_prompts || 0}</div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-sm text-gray-500">Total Tests</div>
-            <div className="text-3xl font-bold">{summary?.total_tests || 0}</div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-sm text-gray-500">Total Cost</div>
-            <div className="text-3xl font-bold">${(summary?.total_cost || 0).toFixed(2)}</div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-sm text-gray-500">Avg Latency</div>
-            <div className="text-3xl font-bold">{summary?.avg_latency || 0}ms</div>
-          </div>
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>Analytics</h1>
         </div>
 
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Test Trends */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold mb-4">Test Activity (Last 30 Days)</h2>
-            <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={trends?.daily_tests || []}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="count" stroke="#2563eb" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
+        <div className={styles.grid}>
+          {/* Summary Cards */}
+          <div className={styles.summaryGrid}>
+            <GlassCard className={styles.summaryCard}>
+              <span className={styles.summaryLabel}>Total Prompts</span>
+              <span className={styles.summaryValue}>{summary?.total_prompts || 0}</span>
+            </GlassCard>
+            <GlassCard className={styles.summaryCard}>
+              <span className={styles.summaryLabel}>Total Tests</span>
+              <span className={styles.summaryValue}>{summary?.total_tests || 0}</span>
+            </GlassCard>
+            <GlassCard className={styles.summaryCard}>
+              <span className={styles.summaryLabel}>Total Cost</span>
+              <span className={styles.summaryValue}>${(summary?.total_cost || 0).toFixed(2)}</span>
+            </GlassCard>
+            <GlassCard className={styles.summaryCard}>
+              <span className={styles.summaryLabel}>Avg Latency</span>
+              <span className={styles.summaryValue}>{summary?.avg_latency || 0}ms</span>
+            </GlassCard>
           </div>
 
-          {/* Cost Trends */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold mb-4">Daily Costs (Last 30 Days)</h2>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={trends?.daily_costs || []}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="cost" fill="#10b981" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+          {/* Charts */}
+          <div className={styles.chartsGrid}>
+            <GlassCard className={styles.chartCard}>
+              <h2 className={styles.cardTitle}>Test Activity (30 Days)</h2>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={trends?.daily_tests || []}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                  <XAxis dataKey="date" stroke={chartTheme.text} tick={{ fontSize: 12 }} />
+                  <YAxis stroke={chartTheme.text} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc' }}
+                  />
+                  <Line type="monotone" dataKey="count" stroke="#06b6d4" strokeWidth={2} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </GlassCard>
 
-        {/* Provider Stats */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold mb-4">Provider Usage</h2>
-            <div className="space-y-3">
-              {summary?.provider_stats?.map((stat) => (
-                <div key={stat.provider} className="flex justify-between items-center">
-                  <div>
-                    <div className="font-medium capitalize">{stat.provider}</div>
-                    <div className="text-sm text-gray-500">{stat.count} tests</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-semibold">${(stat.total_cost || 0).toFixed(2)}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <GlassCard className={styles.chartCard}>
+              <h2 className={styles.cardTitle}>Daily Costs (30 Days)</h2>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={trends?.daily_costs || []}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                  <XAxis dataKey="date" stroke={chartTheme.text} tick={{ fontSize: 12 }} />
+                  <YAxis stroke={chartTheme.text} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc' }}
+                  />
+                  <Bar dataKey="cost" fill="#10b981" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </GlassCard>
           </div>
 
-          {/* Top Prompts */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold mb-4">Top Prompts</h2>
-            <div className="space-y-3">
-              {topPrompts?.slice(0, 5).map((prompt) => (
-                <div key={prompt.id} className="flex justify-between items-center">
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium truncate">{prompt.title}</div>
-                    <div className="text-sm text-gray-500">{prompt.test_count} tests</div>
+          {/* Stats Lists */}
+          <div className={styles.chartsGrid}>
+            <GlassCard className={styles.chartCard}>
+              <h2 className={styles.cardTitle}>Provider Usage</h2>
+              <div className={styles.list}>
+                {summary?.provider_stats?.map((stat) => (
+                  <div key={stat.provider} className={styles.listItem}>
+                    <div>
+                      <div className={styles.itemName} style={{ textTransform: 'capitalize' }}>{stat.provider}</div>
+                      <div className={styles.itemSub}>{stat.count} tests</div>
+                    </div>
+                    <div>
+                      <div className={styles.itemValue}>${(stat.total_cost || 0).toFixed(2)}</div>
+                    </div>
                   </div>
-                  <div className="text-right ml-4">
-                    <div className="text-sm font-semibold">${prompt.total_cost.toFixed(2)}</div>
-                    <div className="text-xs text-gray-500">{prompt.avg_latency}ms</div>
+                ))}
+              </div>
+            </GlassCard>
+
+            <GlassCard className={styles.chartCard}>
+              <h2 className={styles.cardTitle}>Top Prompts</h2>
+              <div className={styles.list}>
+                {topPrompts?.slice(0, 5).map((prompt) => (
+                  <div key={prompt.id} className={styles.listItem}>
+                    <div>
+                      <div className={styles.itemName}>{prompt.title}</div>
+                      <div className={styles.itemSub}>{prompt.test_count} tests</div>
+                    </div>
+                    <div>
+                      <div className={styles.itemValue}>${prompt.total_cost.toFixed(2)}</div>
+                      <div className={styles.itemSubValue}>{prompt.avg_latency}ms</div>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            </GlassCard>
           </div>
         </div>
       </div>

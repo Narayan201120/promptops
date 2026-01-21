@@ -1,0 +1,119 @@
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+}
+
+.header {
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.cardHeader {
+    margin-bottom: 1rem;
+}
+
+.cardTitle {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.cardDesc {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.columnsSection {
+    margin-top: 1rem;
+    border-top: 1px solid var(--border-light);
+    padding-top: 0.75rem;
+}
+
+.columnsToggle {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: none;
+    border: none;
+    padding: 0.5rem 0;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.2s var(--ease-out);
+}
+
+.columnsToggle:hover {
+    color: var(--primary);
+}
+
+.columnsLabel {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.columns {
+    font-family: var(--font-code);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    max-height: 2.25rem;
+    overflow: hidden;
+    transition: max-height 0.3s var(--ease-out);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.columnsExpanded {
+    max-height: 500px;
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+.cardMeta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-light);
+}
+
+.emptyState {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem 2rem;
+    background: rgba(15, 23, 42, 0.3);
+    border: 1px dashed var(--border-light);
+    border-radius: var(--radius-lg);
+    color: var(--text-secondary);
+}
+
+.hiddenInput {
+    display: none;
+}

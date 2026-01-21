@@ -1,149 +1,214 @@
 # PromptOps
 
-**AI Prompt Management Platform** - Manage, version, test, and deploy AI prompts.
+A comprehensive platform for creating, versioning, testing, and analyzing prompts for large language models.
 
-> 🎉 **Status**: MVP Complete! | 📊 **Progress**: 80% | 🚀 **Next**: Deploy to Production
+## Features
 
-[![Django](https://img.shields.io/badge/Django-4.2-green)](https://www.djangoproject.com/)
-[![React](https://img.shields.io/badge/React-18-blue)](https://react.dev/)
-[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
+### Core Platform
+
+- **Prompt Version Control** - Full history tracking with revert capability
+- **Semantic Search** - Find prompts using AI-powered embeddings
+- **Test Sandbox** - Real-time prompt testing with any provider
+- **Batch Testing** - Test prompts across multiple inputs with CSV upload
+- **GitHub Sync** - Sync prompts with your repositories
+
+### Multi-Provider Comparison
+
+- Compare responses across multiple LLM providers simultaneously
+- Side-by-side response display with full markdown rendering
+- Automatic winner detection (cheapest and fastest)
+- Cost, latency, and token usage tracking per provider
+- Two-column layout with provider selection sidebar
+
+### Supported LLM Providers
+
+| Provider | Models |
+|----------|--------|
+| OpenAI | GPT-4, GPT-4 Turbo, GPT-3.5 Turbo |
+| Anthropic | Claude 3.5 Sonnet, Claude 3 Opus, Claude 3 Haiku |
+| Google Gemini | Gemini 1.5 Pro, Gemini 1.5 Flash |
+| Mistral AI | Mistral Large, Mistral Medium, Mistral Small |
+| Cohere | Command R+, Command R |
+| Perplexity | Sonar Pro, Sonar |
+| Grok | Grok (via xAI) |
+
+## Tech Stack
+
+**Backend:** Django 5, Django REST Framework, Celery, Redis, PostgreSQL  
+**Frontend:** React 18, Vite, TanStack Query, Framer Motion, React Markdown
+
+## Backend Features
+
+### Authentication
+
+- JWT token-based authentication with access/refresh tokens
+- Google OAuth integration
+- Secure session management
+
+### API Security
+
+- Rate limiting on all endpoints (configurable per endpoint)
+- CORS configuration with custom header support
+- Audit logging for user actions
+
+### Performance
+
+- Redis-based caching layer for LLM responses
+- Cache hit/miss tracking with configurable TTL
+- Async task processing with Celery
+
+### Monitoring
+
+- Health check endpoint with dependency status
+- Database, Redis, and Celery connectivity checks
+
+### Cost Management
+
+- Per-provider cost calculation based on token usage
+- Real-time cost estimation before execution
+
+## Frontend Features
+
+### UI/UX
+
+- Enterprise-grade dark theme
+- Responsive design for all screen sizes
+- Smooth animations with Framer Motion
+- Full markdown rendering for responses
+
+### Pages
+
+- **Dashboard** - Overview of all prompts with search and filters
+- **Prompt Editor** - Create and edit prompts with live preview
+- **Test Sandbox** - Quick testing with any configured provider
+- **Compare View** - Multi-provider comparison modal
+- **Settings** - API key management and preferences
+- **Analytics** - Usage statistics and insights
+
+### Security
+
+- Zero-trust API key management (client-side storage only)
+- Keys passed via headers, never stored on server
+- Encrypted localStorage for sensitive data
 
 ## Quick Start
 
 ### Prerequisites
+
 - Python 3.11+
 - Node.js 18+
-- Docker Desktop (running)
+- Redis
+- PostgreSQL
 
-### Setup
+### Backend Setup
 
-1. **Start databases:**
-```bash
-docker-compose up -d
-```
-
-2. **Backend setup:**
 ```bash
 cd backend
+python -m venv .venv
+.venv\Scripts\Activate.ps1  # Windows
+# source .venv/bin/activate  # Linux/Mac
 pip install -r requirements.txt
-python manage.py makemigrations
 python manage.py migrate
-python manage.py create_test_data
 python manage.py runserver
 ```
 
-3. **Celery worker (new terminal):**
+### Celery Worker (separate terminal)
+
 ```bash
 cd backend
-start_celery.bat
+.venv\Scripts\Activate.ps1
+celery -A config worker -l info -P solo -c 1
 ```
 
-4. **Frontend setup (new terminal):**
+### Frontend Setup
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-5. **Access the app:**
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:8000/api
-- Admin: http://localhost:8000/admin
+## Environment Variables
 
-6. **Test credentials:**
-- Username: `demo`
-- Password: `demo123`
+### Backend (.env)
+
+```env
+SECRET_KEY=your-secret-key
+DEBUG=True
+DATABASE_URL=postgres://user:pass@localhost:5432/promptops
+REDIS_URL=redis://localhost:6379/0
+
+# Google OAuth
+GOOGLE_CLIENT_ID=your-client-id
+GOOGLE_CLIENT_SECRET=your-client-secret
+```
+
+### Frontend (.env)
+
+```env
+VITE_API_URL=http://localhost:8000/api
+```
+
+## API Endpoints
+
+### Authentication
+
+- `POST /api/auth/register/` - User registration
+- `POST /api/auth/login/` - User login
+- `POST /api/auth/refresh/` - Token refresh
+- `POST /api/auth/logout/` - User logout
+- `GET /api/auth/google/` - Google OAuth
+
+### Prompts
+
+- `GET/POST /api/prompts/` - List/create prompts
+- `GET/PATCH/DELETE /api/prompts/{id}/` - CRUD operations
+- `GET /api/prompts/{id}/versions/` - Version history
+- `POST /api/prompts/{id}/revert/` - Revert to version
+- `POST /api/prompts/{id}/test/` - Test prompt
+- `POST /api/prompts/{id}/compare/` - Multi-provider comparison
+
+### System
+
+- `GET /api/tasks/{id}/` - Async task status
+- `GET /api/health/` - Health check
 
 ## Project Structure
 
 ```
 promptops/
-├── backend/          # Django application
-├── frontend/         # React application
-└── docker-compose.yml
+├── backend/
+│   ├── accounts/           # Authentication
+│   ├── config/             # Django settings
+│   └── prompts/
+│       ├── models.py       # Data models
+│       ├── views.py        # API views
+│       ├── tasks.py        # Celery tasks
+│       ├── services/       # LLM client
+│       ├── cache_utils.py  # Caching layer
+│       └── cost_utils.py   # Cost calculation
+├── frontend/
+│   └── src/
+│       ├── api/            # API client
+│       ├── components/     # React components
+│       ├── pages/          # Page components
+│       ├── context/        # React context
+│       ├── utils/          # Utilities
+│       └── styles/         # Global CSS
+└── README.md
 ```
 
-## Tech Stack
+## Recent Updates
 
-**Backend:** Django 4.2, DRF, PostgreSQL, Redis, Celery
-**Frontend:** React 18, Vite, Tailwind CSS, TanStack Query
-**Deployment:** Docker, Railway/Render, Vercel
-
-## Current Features
-
-✅ **Authentication**
-- User registration with organization creation
-- JWT-based login/logout
-- Token auto-refresh
-- Protected routes
-
-✅ **Prompt Management**
-- Create, read, update, delete prompts
-- Automatic version control
-- Version history and revert
-- Search and filtering
-- Multi-tenant data isolation
-- Inline editing
-- Delete confirmation
-
-✅ **Dashboard**
-- View all prompts
-- Create new prompts
-- Responsive design
-- Modern UI with Tailwind CSS
-
-✅ **Prompt Editor**
-- Detail page with inline editing
-- Version history viewer
-- One-click revert to any version
-- Shared layout with navigation
-
-✅ **LLM Integration**
-- Test prompts against OpenAI (GPT-3.5, GPT-4)
-- Test prompts against Anthropic (Claude 3)
-- Async execution with Celery
-- Real-time results with polling
-- Token counting and cost calculation
-- Variable extraction and replacement
-
-✅ **Analytics Dashboard**
-- Usage metrics and statistics
-- Cost tracking over time
-- Test activity trends (30 days)
-- Provider breakdown (OpenAI vs Anthropic)
-- Top prompts by usage
-- Performance metrics (latency)
-- Interactive charts with Recharts
-
-## Documentation
-
-- [START.md](START.md) - Quick start guide
-- [DEPLOYMENT.md](DEPLOYMENT.md) - Production deployment
-- [TESTING_GUIDE.md](TESTING_GUIDE.md) - How to test
-- [CHECKLIST.md](CHECKLIST.md) - Feature checklist
-- [backend/API.md](backend/API.md) - API reference
-
-## What's Included
-
-**8 Completed Phases:**
-1. ✅ Foundation - Django + React setup
-2. ✅ Authentication - JWT auth system
-3. ✅ Prompt API - CRUD with versioning
-4. ✅ Frontend - React UI with routing
-5. ✅ Prompt Editor - Create/edit/version UI
-6. ✅ LLM Integration - OpenAI + Anthropic
-7. ✅ Analytics - Usage metrics & charts
-8. ✅ Production Ready - Error handling, deployment config
-
-**Ready to Deploy:** See [DEPLOYMENT.md](DEPLOYMENT.md)
-
-## API Keys Required
-
-Add to `backend/.env`:
-```
-OPENAI_API_KEY=sk-your-key-here
-ANTHROPIC_API_KEY=sk-ant-your-key-here
-```
+- Multi-provider comparison with side-by-side responses
+- Full markdown rendering in comparison view
+- Winner badges for cheapest/fastest providers
+- Two-column layout for comparison modal
+- Enterprise UI theme with dark mode
+- Rate limiting and audit logging
+- Redis caching for LLM responses
+- Health check endpoint
+- Cost estimation per provider
 
 ## License
 

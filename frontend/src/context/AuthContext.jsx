@@ -24,10 +24,10 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     const { data } = await authAPI.login(credentials);
-    localStorage.setItem('access_token', data.access);
-    localStorage.setItem('refresh_token', data.refresh);
-    const profile = await authAPI.getProfile();
-    setUser(profile.data);
+    // Backend returns { user: {...}, tokens: { access: '...', refresh: '...' } }
+    localStorage.setItem('access_token', data.tokens.access);
+    localStorage.setItem('refresh_token', data.tokens.refresh);
+    setUser(data.user);  // User data is already in the response
   };
 
   const register = async (userData) => {

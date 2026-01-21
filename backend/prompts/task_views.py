@@ -10,18 +10,20 @@ class TaskStatusView(APIView):
     def get(self, request, task_id):
         task = AsyncResult(task_id)
         
-        if task.ready():
-            result = task.result
+        if task.successful():
+            # Task completed successfully
             return Response({
-                'status': 'completed',
-                'result': result
+                'status': 'SUCCESS',
+                'result': task.result
             })
         elif task.failed():
+            # Task failed
             return Response({
-                'status': 'failed',
+                'status': 'FAILURE',
                 'error': str(task.info)
             })
         else:
+            # Task is still pending or running
             return Response({
-                'status': 'pending'
+                'status': 'PENDING'
             })

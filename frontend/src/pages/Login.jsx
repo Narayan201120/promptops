@@ -1,67 +1,125 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
+import api from '../api/client';
+import GlassCard from '../components/ui/GlassCard';
+import Button from '../components/ui/Button';
+import Input from '../components/ui/Input';
+import { User, Lock, LogIn } from 'lucide-react';
+import styles from './Login.module.css';
 
-export default function Login() {
+function LoginContent() {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
     try {
       await login(credentials);
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.detail || 'Login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const response = await api.post('/auth/google/', {
+        token: credentialResponse.credential
+      });
+
+      localStorage.setItem('access_token', response.data.tokens.access);
+      localStorage.setItem('refresh_token', response.data.tokens.refresh);
+
+      navigate('/');
+      window.location.reload();
+    } catch (error) {
+      console.error('Google login failed:', error);
+      setError(error.response?.data?.error || 'Google login failed');
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
-        <div>
-          <h2 className="text-3xl font-bold text-center">PromptOps</h2>
-          <p className="mt-2 text-center text-gray-600">Sign in to your account</p>
+    <div className={styles.container}>
+      <GlassCard className={styles.authCard}>
+        <div className={styles.header}>
+          <div className={styles.logo}>P</div>
+          <h1 className={styles.title}>Welcome Back</h1>
+          <p className={styles.subtitle}>Sign in to continue to PromptOps</p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="bg-red-50 text-red-600 p-3 rounded">{error}</div>
-          )}
-          <div className="space-y-4">
-            <input
-              type="text"
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Username"
-              value={credentials.username}
-              onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
-            />
-            <input
-              type="password"
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Password"
-              value={credentials.password}
-              onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-            />
-          </div>
-          <button
+
+        <form className={styles.form} onSubmit={handleSubmit}>
+          {error && <div className={styles.error}>{error}</div>}
+
+          <Input
+            icon={User}
+            placeholder="Username or Email"
+            value={credentials.username}
+            onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+            required
+          />
+
+          <Input
+            icon={Lock}
+            type="password"
+            placeholder="Password"
+            value={credentials.password}
+            onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+            required
+          />
+
+          <Button
             type="submit"
-            className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md"
+            className="w-full"
+            loading={loading}
+            icon={LogIn}
           >
             Sign In
-          </button>
-          <p className="text-center text-sm text-gray-600">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-blue-600 hover:text-blue-700">
-              Register
-            </Link>
-          </p>
+          </Button>
+
+          {import.meta.env.VITE_GOOGLE_CLIENT_ID && (
+            <>
+              <div className={styles.divider}>
+                <span className={styles.dividerText}>Or continue with</span>
+              </div>
+
+              <div className="flex justify-center">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => setError('Google login failed')}
+                  theme="filled_black"
+                  shape="pill"
+                  size="large"
+                  width="350"
+                />
+              </div>
+            </>
+          )}
         </form>
-      </div>
+
+        <div className={styles.footer}>
+          Don't have an account?
+          <Link to="/register" className={styles.link}>Register</Link>
+        </div>
+      </GlassCard>
     </div>
+  );
+}
+
+export default function Login() {
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+
+  return (
+    <GoogleOAuthProvider clientId={clientId}>
+      <LoginContent />
+    </GoogleOAuthProvider>
   );
 }

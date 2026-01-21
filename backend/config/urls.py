@@ -16,9 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from prompts.health import basic_health, detailed_health
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/health/', basic_health, name='health_basic'),
+    path('api/health/detailed/', detailed_health, name='health_detailed'),
     path('api/auth/', include('accounts.urls')),
     path('api/', include('prompts.urls')),
     path('api/analytics/', include('analytics.urls')),
