@@ -12,7 +12,7 @@ class AuthenticationTests(APITestCase):
             'password': 'TestPass123!',
             'first_name': 'Test',
             'last_name': 'User',
-            'tenant_name': 'Test Org'
+            'organization_name': 'Test Org'
         }
         response = self.client.post('/api/auth/register/', data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -30,5 +30,5 @@ class AuthenticationTests(APITestCase):
         data = {'username': 'testuser', 'password': 'TestPass123!'}
         response = self.client.post('/api/auth/login/', data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('access', response.data)
-        self.assertIn('refresh', response.data)
+        self.assertIn('access', response.data['tokens'])
+        self.assertIn('refresh', response.data['tokens'])

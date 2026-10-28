@@ -21,24 +21,32 @@ class UserSerializer(serializers.ModelSerializer):
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password], style={'input_type': 'password'})
-    password2 = serializers.CharField(write_only=True, style={'input_type': 'password'}, label='Confirm Password')
-    tenant_name = serializers.CharField(write_only=True, required=True, min_length=1, max_length=255)
+    password2 = serializers.CharField(write_only=True, required=False, style={'input_type': 'password'}, label='Confirm Password')
+    organization_name = serializers.CharField(write_only=True, required=False, max_length=255)
+    tenant_name = serializers.CharField(write_only=True, required=False, max_length=255)
     
     class Meta:
         model = User
-        fields = ['email', 'password', 'password2', 'first_name', 'last_name', 'tenant_name']
+        fields = ['username', 'email', 'password', 'password2', 'first_name', 'last_name', 'organization_name', 'tenant_name']
     
     def validate(self, attrs):
-        if attrs['password'] != attrs['password2']:
+        password2 = attrs.pop('password2', None)
+        if password2 is not None and password2 != attrs['password']:
             raise serializers.ValidationError({"password": "Password fields didn't match."})
+        
+        # The frontend sends organization_name; tenant_name is kept as an alias.
+        name = attrs.get('organization_name') or attrs.get('tenant_name')
+        if not name:
+            raise serializers.ValidationError({"organization_name": "Organization name is required."})
+        attrs['organization_name'] = name
+        attrs.pop('tenant_name', None)
         return attrs
     
     def create(self, validated_data):
-        validated_data.pop('password2')
-        tenant_name = validated_data.pop('tenant_name')
+        organization_name = validated_data.pop('organization_name')
         
         # Create tenant
-        tenant = Tenant.objects.create(name=tenant_name)
+        tenant = Tenant.objects.create(name=organization_name)
         
         # Create user
         user = User.objects.create_user(
